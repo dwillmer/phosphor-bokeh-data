@@ -1,0 +1,46 @@
+{
+  "name": "phosphide-bokeh-data",
+  "version": "0.0.1",
+  "description": "An example data framework application.",
+  "main": "index.js",
+  "dependencies": {
+    "phosphor-messaging": "^1.0.6",
+    "phosphor-properties": "^2.0.0",
+    "phosphor-signaling": "^1.2.0",
+    "phosphor-widget": "^1.0.0-rc.0"
+  },
+  "devDependencies": {
+    "css-loader": "^0.23.1",
+    "http-server": "^0.8.5",
+    "rimraf": "^2.4.4",
+    "style-loader": "^0.13.0",
+    "typescript": "^1.6.2",
+    "webpack": "^1.12.9"
+  },
+  "scripts": {
+    "clean": "rimraf src/*.js",
+    "build": "tsc --project . && webpack --config webpack.conf.js",
+    "postinstall": "npm dedupe",
+    "serve": "http-server -c-1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dwillmer/phosphor-bokeh-data.git"
+  },
+  "files": [
+    "lib/*.css",
+    "lib/*.d.ts",
+    "lib/*.js"
+  ],
+  "keywords": [
+    "application",
+    "ide",
+    "plugin"
+  ],
+  "author": "Dave Willmer <dave.willmer@gmail.com>",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/dwillmer/phosphor-bokeh-data"
+  },
+  "homepage": "https://github.com/dwillmer/phosphor-bokeh-data"
+}
