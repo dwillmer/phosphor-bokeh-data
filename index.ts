@@ -11,6 +11,7 @@ import {
   ISignal, Signal
 } from 'phosphor-signaling';
 
+declare var Bokeh:any;
 
 /**
  * A list of instruments to generate data for.
@@ -84,8 +85,74 @@ class BaseDataProvider implements IDataProvider {
   columns(): number {
     return this._data[0].length;
   }
-
+  
+  constructor() {    
+    this.dataUpdated.connect(this._update_target_data_source, this);
+  }
+  
+  /**
+   * Set the target Bokeh datasource. If a plot is given, will search the
+   * glyphs until it finds one with a data source and then use that.
+   * If null is given, uses the single plot in the page (errors if
+   * there are multiple plots).
+   */
+  set_target(ds: any): void {
+     if (ds === null) {
+         // Find the one Bokeh plot on the page 
+         let plot_keys = Object.keys(Bokeh.index);
+         if (plot_keys.length == 1) {
+             return this.set_target(Bokeh.index[plot_keys[0]]);
+         } else {
+             throw "set_target(null) only works if there is exactly one Bokeh plot, found " + plot_keys.length;
+         }
+     } else if (ds.model && ds.model.type == 'Plot') {
+         // Find a datasource on the plot, assuming all glyphs in the plot share one data source
+         for (var key in ds.renderers) {
+            var r = ds.renderers[key];
+            if (r && r.mget && r.mget('data_source')) {
+                return this.set_target(r.mget('data_source'));
+            }
+         }
+     } else if (ds.stream) {
+         // Looks like a datasource
+         // Reset current
+         if (this._data_source) {
+             for (var key in this._data) {
+                 if (this._data_source.hasOwnProperty(key)) {
+                    this._data_source.get('data')[key] = []
+                 }
+             }
+         }
+         // Store
+         this._data_source = ds;
+         // Reset new
+         if (this._data_source) {
+             for (var key in this._data) {
+                 if (this._data_source.hasOwnProperty(key)) {
+                    this._data_source.get('data')[key] = []
+                 }
+             }
+         }
+     } else {
+         throw "Invalid data source given in set_target(): " + ds;
+     }
+  }
+  
+  private _update_target_data_source(sender: BaseDataProvider, data: any): void {
+      if (this._data_source) {
+          let data_source_data: any = this._data_source.get('data');
+          let data_copy: any = {t: Date.now()};
+          for (var key in data) {
+             if (data_source_data.hasOwnProperty(key)) {
+                 data_copy[key] = data[key];
+             }
+          }
+          this._data_source.stream(data_copy, 100); // todo: how much history?
+      }
+  }
+  
   protected _data: any = [];
+  protected _data_source: any = null;
 }
 
 
@@ -227,6 +294,7 @@ function main() {
   var pnlFeed = new PnlData(posFeed, marketDataFeed);
 
   tradesFeed.initialise();
+  posFeed.set_target(null);
 }
 
 window.onload = main;
