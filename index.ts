@@ -85,11 +85,11 @@ class BaseDataProvider implements IDataProvider {
   columns(): number {
     return this._data[0].length;
   }
-  
-  constructor() {    
+
+  constructor() {
     this.dataUpdated.connect(this._update_target_data_source, this);
   }
-  
+
   /**
    * Set the target Bokeh datasource. If a plot is given, will search the
    * glyphs until it finds one with a data source and then use that.
@@ -98,7 +98,7 @@ class BaseDataProvider implements IDataProvider {
    */
   set_target(ds: any): void {
      if (ds === null) {
-         // Find the one Bokeh plot on the page 
+         // Find the one Bokeh plot on the page
          let plot_keys = Object.keys(Bokeh.index);
          if (plot_keys.length == 1) {
              return this.set_target(Bokeh.index[plot_keys[0]]);
@@ -137,7 +137,7 @@ class BaseDataProvider implements IDataProvider {
          throw "Invalid data source given in set_target(): " + ds;
      }
   }
-  
+
   private _update_target_data_source(sender: BaseDataProvider, data: any): void {
       if (this._data_source) {
           let data_source_data: any = this._data_source.get('data');
@@ -150,7 +150,7 @@ class BaseDataProvider implements IDataProvider {
           this._data_source.stream(data_copy, 100); // todo: how much history?
       }
   }
-  
+
   protected _data: any = [];
   protected _data_source: any = null;
 }
@@ -219,7 +219,7 @@ class PositionsData extends BaseDataProvider {
       this._data[value.instrument] = 0.0;
     }
 
-    if (this._data[value.direction] === 'Buy') {
+    if (value.direction === 'Buy') {
       this._data[value.instrument] += value.quantity;
     } else {
       this._data[value.instrument] -= value.quantity;
